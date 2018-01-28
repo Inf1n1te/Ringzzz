@@ -4,14 +4,21 @@ import exceptions.InvalidNumberOfPlayersException;
 import model.players.Player;
 import model.rings.Colour;
 import model.rings.Ring;
+import model.rings.StartingRing;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Board {
     private final int DIM;
     private final Player[] players;
     private final Territory[][] territories;
+    private Colour shared;
+    private Map<Colour, Player> playerColours;
 
     public Board(int dim, Player[] players) throws InvalidNumberOfPlayersException {
         // Initialize board
@@ -38,6 +45,7 @@ public class Board {
             if (players.length == 3) {
                 Set<Ring> sharedRings = Ring.generateRingSet(Colour.YELLOW);
                 Arrays.stream(players).forEach(player -> player.addRingSet(sharedRings));
+                this.shared = Colour.YELLOW;
             } else {
                 players[3].addRingSet(Ring.generateRingSet(Colour.YELLOW));
             }
@@ -45,9 +53,26 @@ public class Board {
             players[0].addRingSet(Ring.generateRingSet(Colour.GREEN));
             players[1].addRingSet(Ring.generateRingSet(Colour.YELLOW));
         }
+        players[0].addRing(new StartingRing(Colour.ALL));
+        playerColours = Arrays.stream(Colour.values())
+                .filter(colour -> colour != Colour.ALL && colour != shared)
+                .collect(Collectors.toMap(Function.identity(),
+                        colour -> Arrays.stream(players)
+                                .filter(player -> player.getColours()
+                                        .contains(colour)).findFirst()
+                                .orElse(null)));
     }
 
-    private Territory getTerritories(int x, int y) {
+    public Map<Player, Long> getScore() {
+        return Arrays.stream(territories)
+                .flatMap(Arrays::stream)
+                .map(territory -> territory.getWinner(shared))
+                .filter(Objects::nonNull)
+                .map(playerColours::get)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    }
+
+    private Territory getTerritory(int x, int y) {
         return territories[x][y];
     }
 
