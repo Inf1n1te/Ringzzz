@@ -6,6 +6,7 @@ import model.rings.Colour;
 import model.rings.Ring;
 import model.rings.StartingRing;
 
+import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Board {
+public class Board implements Serializable {
     private final int DIM;
     private final Player[] players;
     private final Territory[][] territories;
@@ -74,6 +75,23 @@ public class Board {
 
     private Territory getTerritory(int x, int y) {
         return territories[x][y];
+    }
+
+    private Board deepCopy() {
+        Board newBoard = null;
+        try {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(bytesOut);
+            out.writeObject(this);
+            out.flush();
+            out.close();
+
+            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytesOut.toByteArray()));
+            newBoard = (Board) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return newBoard;
     }
 
 }

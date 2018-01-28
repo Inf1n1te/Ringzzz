@@ -1,6 +1,8 @@
 package model.rings;
 
-public enum Size {
+import java.io.Serializable;
+
+public enum Size implements Serializable {
     TINY,
     SMALL,
     MEDIUM,

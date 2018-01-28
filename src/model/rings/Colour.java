@@ -1,6 +1,8 @@
 package model.rings;
 
-public enum Colour {
+import java.io.Serializable;
+
+public enum Colour implements Serializable {
     RED,
     PURLPLE,
     GREEN,

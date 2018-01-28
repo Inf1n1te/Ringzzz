@@ -3,10 +3,11 @@ package model.players;
 import model.rings.Colour;
 import model.rings.Ring;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class Player {
+public abstract class Player implements Serializable {
     private Set<Ring> rings;
     private Set<Colour> colours;
 
@@ -16,7 +17,7 @@ public abstract class Player {
 
     public void addRing(Ring ring) {
         this.rings.add(ring);
-        if(ring.getColour() != Colour.ALL) colours.add(ring.getColour());
+        if (ring.getColour() != Colour.ALL) colours.add(ring.getColour());
     }
 
     public void addRingSet(Set<Ring> rings) {

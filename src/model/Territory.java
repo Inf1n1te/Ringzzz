@@ -1,13 +1,15 @@
 package model;
 
 import exceptions.InvalidMoveException;
+import exceptions.InvalidRingTypeException;
 import model.rings.*;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Territory {
+public class Territory implements Serializable {
     private final int X;
     private final int Y;
     private Map<Size, Ring> rings;
@@ -48,14 +50,26 @@ public class Territory {
         return null;
     }
 
-    public void doMove(Move move) {
-        Ring ring = move.getRing();
+    public void placeRing(Ring ring) throws InvalidMoveException, InvalidRingTypeException {
         if (ring instanceof BaseRing) {
-
+            if (rings.values().stream().allMatch(Objects::isNull)) rings.keySet().forEach(key -> rings.put(key, ring));
+            else throw new InvalidMoveException("Cannot place a base ring if another ring is already present");
         } else if (ring instanceof SizeRing) {
-
+            if (rings.get(((SizeRing) ring).getSize()) == null) rings.put(((SizeRing) ring).getSize(), ring);
+            else
+                throw new InvalidMoveException("Cannot place a ring if a ring of that size or a base ring is already present");
         } else {
-            throw new InvalidMoveException("Ring is of wrong type: " + ring);
+            throw new InvalidRingTypeException("Ring is of wrong type: " + ring);
+        }
+    }
+
+    public boolean isValidMove(Ring ring) throws InvalidRingTypeException {
+        if (ring instanceof BaseRing) {
+            return rings.values().stream().allMatch(Objects::isNull);
+        } else if (ring instanceof SizeRing) {
+            return rings.get(((SizeRing) ring).getSize()) == null;
+        } else {
+            throw new InvalidRingTypeException("Ring is of wrong type: " + ring);
         }
     }
 
